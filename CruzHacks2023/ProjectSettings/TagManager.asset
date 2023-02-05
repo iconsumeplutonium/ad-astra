@@ -5,7 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - Brain
-  - Star
+  - Chunk
   layers:
   - Default
   - TransparentFX

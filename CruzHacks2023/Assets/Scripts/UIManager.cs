@@ -18,6 +18,9 @@ public class UIManager : MonoBehaviour {
     public GameObject mainMenu;
     public TMP_InputField field;
 
+    public GameObject SeedUI;
+    public TMP_Text seedText;
+
     public bool hasUIElementsOpen;
     public bool transitionCoroutineIsActive;
     public bool isInPlanetaryViewMode;
@@ -38,11 +41,13 @@ public class UIManager : MonoBehaviour {
     private void Start() {
         StarInfoUIPanel.SetActive(false);
         planetOverviewUI.SetActive(false);
+        SeedUI.SetActive(false);
         mainMenu.SetActive(true);
         hasUIElementsOpen = true;
     }
 
     public void EnableStarInfo(StarSystem s/*Utilities.StellarClass sClass, float size*/) {
+        SeedUI.SetActive(false);
         //writes star data to textboxes
         starClass.text = s.star.sClass.ToString();
         starSize.text = Utilities.ConvertUnitsToMiles(s.star.size, chunks.minStarSize, chunks.maxStarSize).ToString("0.##E+00");
@@ -71,6 +76,7 @@ public class UIManager : MonoBehaviour {
 
     public void DisableStarInfo() {
         StarInfoUIPanel.SetActive(false);
+        SeedUI.SetActive(true);
         hasUIElementsOpen = false;
         //Camera.main.transform.position = new Vector3(0f, 5f, 0f);
         //StartCoroutine(ZoomToLocation(viewer, originalPosWhenUIClicked));
@@ -172,9 +178,9 @@ public class UIManager : MonoBehaviour {
 
 
     public void OnRotat() {
-        StartCoroutine(RotateIntoPlanetaryObservationPosition(viewer, controller.selectedSystem.position));
         StarInfoUIPanel.SetActive(false);
-        planetOverviewUI.SetActive(true);
+        SeedUI.SetActive(false);
+        StartCoroutine(RotateIntoPlanetaryObservationPosition(viewer, controller.selectedSystem.position));
         slider.value = 0f;
         GameObject light = Instantiate(container.lightPrefab, controller.selectedSystem.position + new Vector3(0f, -2f, 0f), Quaternion.Euler(90f, 0f, 0f));
         float dist = 3f;
@@ -183,16 +189,19 @@ public class UIManager : MonoBehaviour {
             GameObject o = Instantiate(container.planetPrefabs[(int)controller.selectedSystem.planets[i].type], newPos, Quaternion.identity);
             o.transform.parent = controller.selectedSystem.star.obj.transform;
             instantiatedPlanetsInViewMode.Add(o);
-            dist += 3;
-            
+            dist += 3;            
         }
+
+        planetOverviewUI.SetActive(true);
     }
 
     public void OnSliderValueChanged() {
-        Vector3 start = controller.selectedSystem.position;
-        Vector3 end = instantiatedPlanetsInViewMode[instantiatedPlanetsInViewMode.Count - 1].transform.position;
-        Vector3 lerpedVector = Vector3.Lerp(start, end, slider.value);
-        viewer.transform.position = new Vector3(viewer.transform.position.x, lerpedVector.y, viewer.transform.position.z);
+        if (instantiatedPlanetsInViewMode.Count > 0) {
+            Vector3 start = controller.selectedSystem.position;
+            Vector3 end = instantiatedPlanetsInViewMode[instantiatedPlanetsInViewMode.Count - 1].transform.position;
+            Vector3 lerpedVector = Vector3.Lerp(start, end, slider.value);
+            viewer.transform.position = new Vector3(viewer.transform.position.x, lerpedVector.y, viewer.transform.position.z);
+        }
     }
 
     public void OnReturnToPreviousScreen() {
@@ -203,20 +212,35 @@ public class UIManager : MonoBehaviour {
         for (int i = 0; i < instantiatedPlanetsInViewMode.Count; i++) {
             Destroy(instantiatedPlanetsInViewMode[i]);
         }
+        instantiatedPlanetsInViewMode.Clear();
         StarInfoUIPanel.SetActive(true);
     }
 
     public void OnGenerateUniverse() {
         int seed;
-        if (field.text != null) {
-            int.TryParse(field.text, out seed);
-        } else {
+        if (!int.TryParse(field.text, out seed)) {
             seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
         }
         chunks.seed = seed;
+        seedText.text = $"Current Seed: {seed}";
         mainMenu.SetActive(false);
+        SeedUI.SetActive(true);
         chunks.canGenerateUniverse = true;
         hasUIElementsOpen = false;
+    }
+
+    public void OnNewSystem() {
+        chunks.canGenerateUniverse = false;
+
+        GameObject[] o = GameObject.FindGameObjectsWithTag("Chunk");
+        for (int i = 0; i < o.Length; i++) {
+            Destroy(o[i]);
+        }
+
+        chunks.sectorDict.Clear();
+        chunks.sectorsVisibleLastFrame.Clear();
+        chunks.seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
+        chunks.canGenerateUniverse = true;
     }
 
 

@@ -11,8 +11,8 @@ public class StarSectorChunks : MonoBehaviour {
     public static Vector2 camPos;
     public int renderDist;
 
-    Dictionary<Vector2, StarSector> sectorDict = new Dictionary<Vector2, StarSector>();
-    List<StarSector> sectorsVisibleLastFrame = new List<StarSector>();
+    public Dictionary<Vector2, StarSector> sectorDict = new Dictionary<Vector2, StarSector>();
+    public List<StarSector> sectorsVisibleLastFrame = new List<StarSector>();
 
     public int seed;
 
@@ -73,6 +73,7 @@ public class StarSectorChunks : MonoBehaviour {
             position = new Vector3(pos.x * size, 0, pos.y * size);
             sectorObj = new GameObject($"P({position.x}, {position.z})");
             sectorObj.transform.position = position;
+            sectorObj.tag = "Chunk";
 
             plane = GameObject.CreatePrimitive(PrimitiveType.Plane);
             plane.transform.parent = sectorObj.transform;
