@@ -1,8 +1,9 @@
 # Ad Astra
 A procedurally generated universe, created for Cruzhacks 2023
 
-Executable is in CruzHacks2023/Builds/Ad Astra.exe
+Executable is in [CruzHacks2023/Builds/Ad Astra.exe](https://github.com/iconsumeplutonium/ad-astra/tree/main/CruzHacks2023/Builds).
 
+DevPost can be found [here](https://devpost.com/software/ad-astra-mqwz2g).
 
 
 
